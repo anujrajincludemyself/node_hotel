@@ -81,12 +81,13 @@ router.delete('/:id' , async(req,res)=>{
         if(!response){
     res.status(404).json({cooked})
 }
+//this is a comment
     }
     catch(err){
         console.log('error');
                 res.status(500)
 
-        
+    //this code iss demo code 
 
     }
 })
