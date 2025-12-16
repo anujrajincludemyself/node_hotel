@@ -3,12 +3,14 @@ const app = express();
 const person = require('./models/person')
 app.use(express.json());
 const menuitem = require('./models/menuitem');
+require('dotenv').config();
 
 
 app.get('/',function(req, res){
        res.send('hi');
 })
 
+const port = process.env.port || 3000
 
 
 

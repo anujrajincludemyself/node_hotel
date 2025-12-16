@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^2.2.1",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "lodash": "^4.17.21",
     "mongoosh": "^0.0.7",
