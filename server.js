@@ -1,12 +1,25 @@
 const express = require('express')
 const app = express();
-const person = require('./models/person')
 app.use(express.json());
 const menuitem = require('./models/menuitem');
 require('dotenv').config();
+const passport = require('./auth')
 
 
-app.get('/',function(req, res){
+//ab kon sai route ko auth karna hai sabsai pehla kaam auth ko intialize karo 
+
+app.use(passport.initialize());//ab yai passport ko intialize kar diya 
+
+const logrequest = (req, res, next) => {
+    console.log(`${new Date().toLocaleString()} request to ${req.originalUrl}`);
+    next();
+};
+
+app.use(logrequest)
+
+
+
+app.get('/',localstratagy,function(req, res){
        res.send('hi');
 })
 
