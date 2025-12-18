@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Person = require('../models/person');
 const { jwtAuthMiddleware, generateToken } = require('../jwt');
+const bcrypt = require('bcryptjs');
+
 
 
 // SIGNUP / SIGNIN
@@ -60,7 +62,7 @@ router.post('/login', async (req, res) => {
 
 
 // GET ALL PERSONS
-router.get('/', async (req, res) => {
+router.get('/',jwtAuthMiddleware, async (req, res) => {
   try {
     const data = await Person.find();
     res.status(200).json(data);
@@ -68,6 +70,20 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.get('/profile',jwtAuthMiddleware,async(req,res) =>{
+    try{
+        const userdata = req.user;
+
+        const userid = userdata.id;
+        const user = await Person.findById(userid)
+
+        res.status(200).json({user})
+
+    }catch(err){
+        res.status(500).json(err)
+    }
+})
 
 // GET BY WORK TYPE
 router.get('/:worktype', async (req, res) => {
