@@ -1,98 +1,28 @@
-const express = require('express')
+const express = require('express');
 const app = express();
-app.use(express.json());
-const menuitem = require('./models/menuitem');
 require('dotenv').config();
-const passport = require('./auth')
+const bcrypt = require('bcryptjs');
 
 
-//ab kon sai route ko auth karna hai sabsai pehla kaam auth ko intialize karo 
+app.use(express.json());
 
-app.use(passport.initialize());//ab yai passport ko intialize kar diya 
-
+// logger middleware
 const logrequest = (req, res, next) => {
-    console.log(`${new Date().toLocaleString()} request to ${req.originalUrl}`);
-    next();
+  console.log(`${new Date().toLocaleString()} request to ${req.originalUrl}`);
+  next();
 };
+app.use(logrequest);
 
-app.use(logrequest)
+// routes
+const personRoutes = require('./routes/personRoute');
+app.use('/person', personRoutes);
 
-
-
-app.get('/',localstratagy,function(req, res){
-       res.send('hi');
-})
-
-const port = process.env.port || 3000
-
-
-
-
-
-const personroutes = require('./routes/personRoute')
-app.use('/person' , personroutes)
-
-const menuroutes = require('./routes/menuRoutes')
-app.use('/menu',menuroutes)
-
-
-app.listen(3000, ()=>{
-    console.log('the server is listening');
+// test route
+app.get('/', (req, res) => {
+  res.send('Server running');
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// var age= notes.age;
-// console.log(age)
-// var result = notes.addsum(age+18, 10)
-// console.log(result);
-
-
-
-
-// var fs = require('fs')
-// var os = require('os')
-
-
-// let user = os.userInfo()
-// console.log(user.username)
-
-// fs.appendFile('greeting.txt', 'hi'+ user.username+ '\n' , ()=> {console.log('you are done')})
-// const notes = require('./notes.js')
-// var _ = require('lodash')
-
-// var data = [23,23,'anuj','raj']
-
-// var filter = _.uniq(data);
-// console.log(filter);
-
-
-
-// app.get('/chicken',function(req,res){
-//     res.send('i love chicken');
-// })
-// app.get('/hot',function(req,res){
-//  var typesofphotos ={
-//     first:'b****',
-//     second:'a**',
-//     third:'biki**'
-//  }
-//     res.send(typesofphotos);
-// })
-
-// app.post('/item' , (res) => {
-//     res.send('we got it anuj')  
-
-// })
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

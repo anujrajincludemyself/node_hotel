@@ -1,102 +1,122 @@
-const express = require ('express')
+const express = require('express');
 const router = express.Router();
-const person = require('./../models/person')
+const Person = require('../models/person');
+const { jwtAuthMiddleware, generateToken } = require('../jwt');
 
 
+// SIGNUP / SIGNIN
+router.post('/signin', async (req, res) => {
+  try {
+    const data = req.body;
 
-router.post('/',async(req,res)=>{
-    try{
-       const data = req.body
-       const newperson = new person(data)
-       await newperson.save();
-       console.log('data saved')
-       res.status(200).json(newperson);
+    const newPerson = new Person(data);
+    await newPerson.save();
+
+    // ✅ generate token like your screenshot
+    const token = generateToken({
+      id: newPerson._id,
+      username: newPerson.username
+    });
+
+    res.status(200).json({
+      response: newPerson,
+      token: token
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await Person.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-    catch(error){
-        console.log('error 500');
-        res.status(500).json(error) 
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-})
+    const payload = {
+      id: user._id,
+      username: user.username
+    };
 
-router.get('/',async(req,res)=>{
-    try{    
-    const data = await person.find()
-    console.log('data saved')
+    const token = generateToken(payload);
+    res.json({ token });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+// GET ALL PERSONS
+router.get('/', async (req, res) => {
+  try {
+    const data = await Person.find();
     res.status(200).json(data);
-    }catch(error){
-        console.log('error 500');
-        res.status(500).json(error) 
-    }
-})
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-router.get('/:worktype',async(req,res)=>{
-try{
+// GET BY WORK TYPE
+router.get('/:worktype', async (req, res) => {
+  try {
     const worktype = req.params.worktype;
-    if(worktype=='chef' || worktype=='waiter' || worktype=='manager'){
-        const response = await person.find({work: worktype})
-        console.log('here it is');
-        res.status(200).json(response)}
-    else{
-        console.log(
-            'error occured '
-        );
-        res.status(404);
-        
-    } 
 
-}
-catch(error){
-console.log('error occured 500');
-res.status(500).json({error})
- }
-})
-
-
-router.put('/:id', async(req,res)=>{
-   try{
-    const personid = req.params.id
-    const alag = req.body
-
-    const response = await person.findByIdAndUpdate(personid,alag,{
-        new: true,
-        runValidators: true
-    })
-if(!response){
-    res.status(404).json({cooked})
-}
-    res.status(200).json(response)
-   }
-    catch(err){
-        console.log('error occured', err);
-        res.status(500).json(err)
+    if (!['chef', 'waiter', 'manager'].includes(worktype)) {
+      return res.status(400).json({ error: 'Invalid work type' });
     }
-})
 
-router.delete('/:id' , async(req,res)=>{
-    try{
-        const personid = req.params.id
-        const deleteid = await person.findByIdAndDelete(personid)
-        res.status(200)
-        if(!response){
-    res.status(404).json({cooked})
-}
-//this is a comment
+    const response = await Person.find({ work: worktype });
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// UPDATE BY ID
+router.put('/:id', async (req, res) => {
+  try {
+    const response = await Person.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!response) {
+      return res.status(404).json({ message: 'Person not found' });
     }
-    catch(err){
-        console.log('error');
-                res.status(500)
 
-    //this code iss demo code 
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
+// DELETE BY ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const response = await Person.findByIdAndDelete(req.params.id);
+
+    if (!response) {
+      return res.status(404).json({ message: 'Person not found' });
     }
-})
 
-
-
-
-
-
-
+    res.status(200).json({ message: 'Person deleted' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

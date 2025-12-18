@@ -4,31 +4,25 @@ const localstratagy = require('passport-local').Strategy;
 
 
 
-passport.use(
-  new localstratagy(async (Username, Password, done) => {
-    try {
-      console.log('credentials received', Username, password);
+passport.use(new localstratagy(async (username, password, done) => {
+  try {
+    // console.log('Received credentials:', username, password);
 
-      const user = await person.findOne({username,Username });
+    const user = await person.findOne({ username });
+    if (!user)
+      return done(null, false, { message: 'Incorrect username.' });
 
-      if (!user) {
-        return done(null, false);
-      }
+    const isPasswordMatch = user.comparepassword(password);
 
-      if (user.password !== Password) {
-        return done(null, false);
-      }else{
+    if (isPasswordMatch)
       return done(null, user);
-    }
-    } 
-    
-    catch (err) {
-      return done(err);
-    }
-  })
-);
+    else
+      return done(null, false, { message: 'Incorrect password.' });
 
-
+  } catch (error) {
+    return done(error);
+  }
+}));
 
 
 module.exports = passport
