@@ -6,6 +6,9 @@ const bcrypt = require('bcryptjs');
 
 app.use(express.json());
 
+const bodyparser = require('body-parser')
+app.use(bodyparser.json())
+
 // logger middleware
 const logrequest = (req, res, next) => {
   console.log(`${new Date().toLocaleString()} request to ${req.originalUrl}`);
